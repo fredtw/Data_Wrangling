@@ -1,0 +1,56 @@
+---
+title: "Titanic"
+author: "Frederic TWAHIRWA"
+date: "2 février 2017"
+output: html_document
+---
+
+```{r}
+# clean up the memory of the current R session
+rm(list=ls(all=TRUE))
+```
+
+```{r}
+# load packages
+library(dplyr)
+library(tidyr)
+```
+
+Loading a csv file in RStudio into a data frame; Here I am using read.csv instead of read.table which expects an element in each column 
+All missing (empty) values are replaced  by the string 'NA' (args ) na.strings=c("", "NA") in the read.csv() function
+```{r}
+# load dat set in tamporaly data set "titanicf"
+titanicf<-read.csv('titanic_original.csv', header = T, sep=';', dec=",", na.strings=c("", "NA"))
+
+# replace missing value in embarked column with "s"
+titanicf$embarked[which(is.na(titanicf$embarked))]<-"S"
+```
+
+```{r}
+# the summary() function provides for each variable in your dataset the minimum, mean, maximum and quartiles
+summary(titanicf$age)
+```
+
+```{r}
+# replace the values in the Age column are missing by the mean (29.88)
+# this missing value could be repaced by the median value  (28.00)
+
+age_mean<-mean(titanicf$age, na.rm = TRUE)
+age_median<-median(titanicf$age, na.rm = TRUE)
+
+titanicf$age[which(is.na(titanicf$age))]<-mean(titanicf$age, na.rm = TRUE)
+```
+In cabin column, it seems that there is a lot of data not recorded in this field, special in second and third class
+may be this column reflects who booked with cabins.
+
+```{r}
+#create a new column, in this case I am using "dplyr" with mutate, as.numeric and !is.na allow to coerce the TRUE logic variable in 0 numeric and FALSe logic variable in 1 numeric
+titanicf<-titanicf%>% 
+        mutate(has_cabin_number=as.numeric(!is.na(titanicf$cabin)))
+```
+
+```{r}
+# write a csv file on my working directory
+write.csv(titanicf, file = "titanic_clean.csv")
+
+```
